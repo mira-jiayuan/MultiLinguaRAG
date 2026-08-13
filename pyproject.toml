@@ -5,7 +5,7 @@ description = "A multilingual RAG knowledge assistant for Chinese, Japanese, and
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
 license = { text = "MIT" }
-authors = [{ name = "Your Name" }]
+authors = [{ name = "Jiayuan Di" }]
 keywords = ["rag", "multilingual", "qwen3", "qdrant", "docling", "llm"]
 dependencies = [
   "docling==2.119.0",
