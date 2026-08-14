@@ -14,6 +14,57 @@
 - Generates grounded answers through the **OpenAI Responses API** when an API key is configured.
 - Shows deterministic source metadata and retrieved chunks in a **Streamlit** UI.
 
+
+## 🖥️ Demo
+
+![MultiLinguaRAG demo preview](docs/demo-preview.png)
+
+The repository includes a small **static portfolio demo** in [`docs/index.html`](docs/index.html). It demonstrates the intended multilingual UX with the bundled Chinese, Japanese, and English sample texts.
+
+> The static page is a preview, not a fake claim of live model execution. Real retrieval scores and answers are produced only when the local RAG pipeline is running.
+
+To publish the preview with GitHub Pages: **Settings → Pages → Deploy from a branch → `main` → `/docs`**.
+
+## ⌨️ Input and output
+
+### Input
+
+MultiLinguaRAG accepts two kinds of input:
+
+1. **Knowledge-base documents** — PDF, DOCX, PPTX, XLSX, Markdown, TXT, HTML, or CSV files in Chinese, Japanese, and/or English.
+2. **User query** — a natural-language question in Chinese, Japanese, or English.
+
+Example:
+
+```text
+Knowledge base:
+- zh_rag.md
+- ja_rag.md
+- en_rag.md
+
+User query:
+RAG 是什么？
+```
+
+### Output
+
+The system returns:
+
+1. **Grounded answer** in the same language as the user's query by default.
+2. **Top-K retrieved evidence chunks** used as context.
+3. **Source metadata** such as file name, page number when available, language, section headings, and similarity score.
+
+Example:
+
+```text
+Answer:
+RAG 会在生成回答之前检索外部知识，并基于检索到的证据生成回答 [S1][S2]。
+
+Sources:
+[S1] ja_rag.md · page n/a · language=ja
+[S2] zh_rag.md · page n/a · language=zh
+```
+
 ## 🧠 Core architecture
 
 ```text
