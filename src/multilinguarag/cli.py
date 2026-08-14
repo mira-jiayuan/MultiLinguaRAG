@@ -20,10 +20,20 @@ def query_main() -> None:
     parser = argparse.ArgumentParser(description="Query MultiLinguaRAG.")
     parser.add_argument("question")
     parser.add_argument("--top-k", type=int, default=None)
+    parser.add_argument(
+        "--answer-language",
+        choices=["auto", "zh", "ja", "en"],
+        default="auto",
+        help="Output language: auto=same as query, zh=Chinese, ja=Japanese, en=English",
+    )
     args = parser.parse_args()
 
     rag = MultiLinguaRAG()
-    answer, chunks = rag.answer(args.question, k=args.top_k)
+    answer, chunks = rag.answer(
+        args.question,
+        k=args.top_k,
+        answer_language=args.answer_language,
+    )
     print("\nANSWER\n------")
     print(answer)
     print("\nSOURCES\n-------")

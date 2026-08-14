@@ -5,93 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>MultiLinguaRAG Demo</title>
 <style>
-  :root{--bg:#f7f8fb;--panel:#fff;--ink:#14213d;--muted:#6b7280;--line:#e5e7eb;--accent:#4f46e5;--accent2:#0f766e;--soft:#eef2ff;--soft2:#ecfeff;--shadow:0 16px 40px rgba(15,23,42,.08)}
-  *{box-sizing:border-box}
-  body{margin:0;background:linear-gradient(180deg,#f8fafc,#f3f4f6);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
-  .wrap{max-width:1180px;margin:36px auto;padding:0 24px}
-  .top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:18px}
-  h1{font-size:34px;line-height:1.05;margin:0 0 8px;font-weight:800;letter-spacing:-.03em}
-  .sub{color:var(--muted);font-size:15px}
-  .badge{background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 13px;font-size:12px;color:#475569;white-space:nowrap}
-  .notice{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:14px;padding:10px 14px;font-size:12px;margin-bottom:16px}
-  .app{display:grid;grid-template-columns:300px 1fr;background:var(--panel);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow);min-height:640px}
-  aside{background:#fbfcff;border-right:1px solid var(--line);padding:24px}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:800;margin-bottom:24px}
-  .logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#06b6d4);display:grid;place-items:center;color:white;font-size:19px}
-  .label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;font-weight:700;margin:18px 0 10px}
-  .doc{display:flex;align-items:center;gap:10px;padding:10px 11px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:white;font-size:13px}
-  .lang{margin-left:auto;font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px;background:#eef2ff;color:#4338ca}
-  .pipe{font-size:12px;color:#475569;line-height:1.65;background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:12px}
-  main{display:flex;flex-direction:column;padding:26px 30px 22px}
-  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-  .toolbar b{font-size:15px}.status{font-size:11px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;border-radius:999px;padding:6px 9px;font-weight:700}
-  .chips{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
-  .chip{border:1px solid var(--line);background:white;border-radius:999px;padding:8px 11px;font-size:12px;cursor:pointer;color:#475569}
-  .chip.active{background:var(--soft);border-color:#c7d2fe;color:#3730a3;font-weight:700}
-  .chat{flex:1;display:flex;flex-direction:column;gap:16px}
-  .msg{max-width:84%;padding:14px 16px;border-radius:16px;font-size:14px;line-height:1.65}
-  .user{align-self:flex-end;background:#111827;color:white;border-bottom-right-radius:5px}
-  .assistant{align-self:flex-start;background:#f8fafc;border:1px solid var(--line);border-bottom-left-radius:5px}
-  .answer-title{font-weight:800;margin-bottom:6px}
-  .sources{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .source{border:1px solid var(--line);background:white;border-radius:13px;padding:11px 12px}
-  .source-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px;font-size:12px;font-weight:800}
-  .source p{margin:0;color:#64748b;font-size:11.5px;line-height:1.55}
-  .s-ja{color:#9f1239}.s-en{color:#1d4ed8}.s-zh{color:#047857}
-  .input{margin-top:18px;border:1px solid #cbd5e1;border-radius:16px;padding:12px 14px;color:#94a3b8;font-size:13px;display:flex;justify-content:space-between;align-items:center;background:white}
-  .send{width:30px;height:30px;border-radius:10px;background:#111827;color:white;display:grid;place-items:center}
-  .footer{margin-top:14px;text-align:center;color:#94a3b8;font-size:11px}
-  @media(max-width:850px){.app{grid-template-columns:1fr} aside{display:none}.sources{grid-template-columns:1fr}.msg{max-width:95%}.top{align-items:flex-start;flex-direction:column}}
+:root{--bg:#f6f7fb;--panel:#fff;--ink:#14213d;--muted:#667085;--line:#e6e8ef;--accent:#4f46e5;--soft:#eef2ff;--shadow:0 18px 46px rgba(15,23,42,.09)}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#fafbff,#f3f5f8);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+.wrap{max-width:1180px;margin:34px auto;padding:0 24px}.top{display:flex;justify-content:space-between;gap:24px;align-items:flex-end;margin-bottom:16px}h1{font-size:34px;margin:0 0 8px;letter-spacing:-.03em}.sub{color:var(--muted);font-size:15px}.badge{border:1px solid var(--line);background:white;border-radius:999px;padding:9px 13px;font-size:12px;color:#475569}.notice{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:14px;padding:10px 14px;font-size:12px;margin-bottom:16px}
+.app{display:grid;grid-template-columns:300px 1fr;background:var(--panel);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow);min-height:640px} aside{padding:24px;background:#fbfcff;border-right:1px solid var(--line)}.brand{font-weight:800;display:flex;align-items:center;gap:10px;margin-bottom:22px}.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#4f46e5,#06b6d4);display:grid;place-items:center;color:white}.label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#98a2b3;font-weight:800;margin:18px 0 9px}.doc{display:flex;gap:9px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:8px;font-size:13px}.lang{margin-left:auto;font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px;background:#eef2ff;color:#4338ca}.control{border:1px solid var(--line);border-radius:12px;background:white;padding:10px 11px;font-size:13px}.control b{display:block;margin-bottom:5px}.select{display:flex;justify-content:space-between;color:#3730a3;font-weight:700;background:var(--soft);padding:8px 9px;border-radius:9px}.pipe{font-size:12px;line-height:1.65;color:#475569;background:#f8fafc;border:1px solid var(--line);padding:11px;border-radius:12px}
+main{padding:26px 30px 22px;display:flex;flex-direction:column}.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.status{font-size:11px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;border-radius:999px;padding:6px 9px;font-weight:700}.flow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.flow span{font-size:11px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px}.flow .active{background:#eef2ff;color:#3730a3;border-color:#c7d2fe;font-weight:800}.chat{flex:1;display:flex;flex-direction:column;gap:15px}.msg{max-width:86%;padding:14px 16px;border-radius:16px;font-size:14px;line-height:1.65}.user{align-self:flex-end;background:#111827;color:white;border-bottom-right-radius:5px}.assistant{align-self:flex-start;background:#f8fafc;border:1px solid var(--line);border-bottom-left-radius:5px}.answer-title{font-weight:800;margin-bottom:7px}.meta{font-size:11px;color:#64748b;margin-top:8px}.sources{margin-top:15px;display:grid;grid-template-columns:1fr 1fr;gap:10px}.source{border:1px solid var(--line);background:white;border-radius:13px;padding:11px}.source-top{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:6px}.source p{margin:0;color:#64748b;font-size:11.5px;line-height:1.5}.input{margin-top:17px;border:1px solid #cbd5e1;border-radius:16px;padding:12px 14px;color:#94a3b8;font-size:13px;display:flex;justify-content:space-between}.send{width:30px;height:30px;border-radius:10px;background:#111827;color:white;display:grid;place-items:center}.footer{text-align:center;color:#98a2b3;font-size:11px;margin-top:13px}@media(max-width:850px){.app{grid-template-columns:1fr}aside{display:none}.sources{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.msg{max-width:96%}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">
-    <div>
-      <h1>🌏 MultiLinguaRAG</h1>
-      <div class="sub">Cross-lingual retrieval and grounded QA across Chinese, Japanese, and English documents.</div>
-    </div>
-    <div class="badge">Portfolio Demo · Core RAG Pipeline</div>
-  </div>
-  <div class="notice">Static portfolio preview. The interaction below uses bundled sample text to illustrate the intended UX; live retrieval results are produced by the local RAG pipeline.</div>
+  <div class="top"><div><h1>🌏 MultiLinguaRAG</h1><div class="sub">Source language ≠ Query language ≠ Answer language.</div></div><div class="badge">Portfolio Demo · Cross-Lingual RAG</div></div>
+  <div class="notice">Static preview. It illustrates the intended workflow; live retrieval scores and model outputs are produced by the local RAG pipeline.</div>
   <section class="app">
     <aside>
       <div class="brand"><div class="logo">🌐</div>Knowledge Base</div>
-      <div class="label">Indexed documents</div>
-      <div class="doc">📄 zh_rag.md <span class="lang">ZH</span></div>
-      <div class="doc">📄 ja_rag.md <span class="lang">JA</span></div>
-      <div class="doc">📄 en_rag.md <span class="lang">EN</span></div>
-      <div class="label">V1 pipeline</div>
+      <div class="label">Indexed sources</div>
+      <div class="doc">📄 communication_theory.pdf <span class="lang">EN</span></div>
+      <div class="doc">📄 social_media_report.pdf <span class="lang">EN</span></div>
+      <div class="label">Answer setting</div>
+      <div class="control"><b>Target language</b><div class="select">日本語 <span>⌄</span></div></div>
+      <div class="label">Pipeline</div>
       <div class="pipe">Docling<br>↓<br>HybridChunker<br>↓<br>Qwen3-Embedding<br>↓<br>Qdrant Top-K<br>↓<br>LLM + Citations</div>
     </aside>
     <main>
-      <div class="toolbar"><b>Cross-Lingual Knowledge Chat</b><span class="status">● Index ready</span></div>
-      <div class="chips">
-        <button class="chip active" data-demo="zh">中文 Query → 日/英文 Source</button>
-        <button class="chip" data-demo="ja">日本語 Query → 英文 Source</button>
-        <button class="chip" data-demo="en">English Query → 中文 Source</button>
-      </div>
+      <div class="toolbar"><b>Multilingual Knowledge Assistant</b><span class="status">● Index ready</span></div>
+      <div class="flow"><span>🇺🇸 English sources</span><span>→</span><span>🇨🇳 Chinese query</span><span>→</span><span class="active">🇯🇵 Japanese answer</span></div>
       <div class="chat">
-        <div class="msg user" id="question">RAG 是什么？它为什么能降低没有证据支持的回答风险？</div>
+        <div class="msg user">这些材料如何解释社交媒体对跨文化传播的影响？</div>
         <div class="msg assistant">
-          <div class="answer-title">Grounded answer</div>
-          <div id="answer">RAG 会在生成回答之前先从外部知识库检索相关信息，并把这些证据作为上下文提供给大语言模型 [S1][S2]。这样回答不只依赖模型参数中的记忆，因此可以降低没有证据支持的回答风险；不过，如果检索到的内容本身错误或无关，RAG 仍然可能产生不可靠答案 [S2]。</div>
-          <div class="sources" id="sources"></div>
+          <div class="answer-title">🇯🇵 Grounded answer</div>
+          ソーシャルメディアは、異なる文化的背景をもつ人々の接触機会を増やし、情報共有を加速させる一方で、文脈の欠落や文化的前提の違いによる誤解も生みやすいとされています [S1][S2]。したがって、異文化コミュニケーションでは、単に情報を翻訳するだけでなく、背景となる文化的文脈を補足することが重要です [S2]。
+          <div class="meta">Query: ZH · Output: JA · Sources retrieved from original EN documents</div>
+          <div class="sources">
+            <div class="source"><div class="source-top"><span>[S1] communication_theory.pdf · p.12</span><span>EN</span></div><p>Social media increases opportunities for intercultural contact and accelerates information exchange across communities...</p></div>
+            <div class="source"><div class="source-top"><span>[S2] social_media_report.pdf · p.7</span><span>EN</span></div><p>Cross-cultural misunderstanding can emerge when messages travel without the contextual assumptions shared by the original community...</p></div>
+          </div>
         </div>
       </div>
       <div class="input"><span>Ask in Chinese, Japanese, or English…</span><span class="send">↑</span></div>
     </main>
   </section>
-  <div class="footer">MultiLinguaRAG · Static demo preview for GitHub Pages</div>
+  <div class="footer">MultiLinguaRAG · English sources → Chinese query → Japanese answer</div>
 </div>
-<script>
-const demos={
- zh:{q:'RAG 是什么？它为什么能降低没有证据支持的回答风险？',a:'RAG 会在生成回答之前先从外部知识库检索相关信息，并把这些证据作为上下文提供给大语言模型 [S1][S2]。这样回答不只依赖模型参数中的记忆，因此可以降低没有证据支持的回答风险；不过，如果检索到的内容本身错误或无关，RAG 仍然可能产生不可靠答案 [S2]。',s:[['S1 · ja_rag.md','JA','RAG は、回答を生成する前に外部の知識ベースから関連情報を検索し、その情報をコンテキストとして大規模言語モデルに与える方法です。'],['S2 · zh_rag.md','ZH','RAG 的主要价值包括更新知识、提供可追踪来源，以及降低没有证据支持的回答风险。RAG 不能彻底消除幻觉。']]},
- ja:{q:'Top-K を大きくしすぎると何が起こりますか？',a:'Top-K を大きくしすぎると、関連性の低いチャンクまで生成段階に渡されやすくなり、ノイズが増えます。また、より多くのコンテキストトークンを消費します [S1]。',s:[['S1 · en_rag.md','EN','A very small K may miss useful evidence, while a very large K can introduce noise and consume more context tokens.'],['S2 · ja_rag.md','JA','検索品質は最終回答の品質に大きく影響します。']]},
- en:{q:'Why can a multilingual embedding retrieve evidence written in another language?',a:'A multilingual embedding model maps semantically related text from different languages into a shared vector space [S1]. Because the query and documents are represented in that shared space, an English query can retrieve semantically related Chinese or Japanese evidence [S1][S2].',s:[['S1 · en_rag.md','EN','A multilingual embedding model maps semantically related text from different languages into a shared vector space.'],['S2 · ja_rag.md','JA','質問と文書を多言語埋め込みで同じベクトル空間に写像すると、中国語の質問から日本語の資料を検索するようなクロスリンガル検索も可能になります。']]}
-};
-function render(key){const d=demos[key];document.getElementById('question').textContent=d.q;document.getElementById('answer').textContent=d.a;document.getElementById('sources').innerHTML=d.s.map(x=>`<div class="source"><div class="source-top"><span>${x[0]}</span><span class="s-${x[1].toLowerCase()}">${x[1]}</span></div><p>${x[2]}</p></div>`).join('');document.querySelectorAll('.chip').forEach(b=>b.classList.toggle('active',b.dataset.demo===key));}
-document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>render(b.dataset.demo)));render('zh');
-</script>
 </body>
 </html>

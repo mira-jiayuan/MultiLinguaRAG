@@ -1,147 +1,161 @@
 # 🌏 MultiLinguaRAG
 
-**A compact multilingual RAG knowledge assistant for Chinese, Japanese, and English documents.**
+**A cross-lingual RAG assistant where the source language, query language, and answer language are independently configurable.**
 
-> V1 goal: make the core **Indexing → Retrieval → Generation** pipeline clear, inspectable, and portfolio-ready—without hiding it behind a large RAG framework.
+> Example: **English source documents → Chinese question → Japanese grounded answer + original citations.**
 
 ## ✨ What it does
 
+- Uploads knowledge sources in **Chinese, Japanese, English, or a mixture of them**.
 - Parses PDF / DOCX / PPTX / XLSX / Markdown / TXT / HTML / CSV with **Docling**.
 - Uses **Docling HybridChunker** for structure-aware, tokenizer-aware chunks.
 - Uses **Qwen3-Embedding-0.6B** for multilingual and cross-lingual dense retrieval.
 - Stores vectors + source metadata in local **Qdrant**.
-- Retrieves **Top-K** evidence with cosine similarity.
+- Retrieves **Top-K evidence across languages**.
+- Lets the user choose the **answer language independently**: Auto, Chinese, Japanese, or English.
 - Generates grounded answers through the **OpenAI Responses API** when an API key is configured.
-- Shows deterministic source metadata and retrieved chunks in a **Streamlit** UI.
-
+- Shows source citations and the actual retrieved evidence in a **Streamlit** UI.
 
 ## 🖥️ Demo
 
-![MultiLinguaRAG demo preview](docs/demo-preview.png)
+![MultiLinguaRAG multilingual workflow preview](docs/demo-preview-v3.svg)
 
-The repository includes a small **static portfolio demo** in [`docs/index.html`](docs/index.html). It demonstrates the intended multilingual UX with the bundled Chinese, Japanese, and English sample texts.
+The repository includes a static portfolio demo in [`docs/index.html`](docs/index.html).
 
-> The static page is a preview, not a fake claim of live model execution. Real retrieval scores and answers are produced only when the local RAG pipeline is running.
+> The static page is a preview of the intended UX. Real retrieval scores and model answers are produced only when the local RAG pipeline is running.
 
-To publish the preview with GitHub Pages: **Settings → Pages → Deploy from a branch → `main` → `/docs`**.
+## 🔥 Core design: three languages are decoupled
 
-## ⌨️ Input and output
+A normal multilingual chatbot often assumes that the user asks and receives an answer in the same language. MultiLinguaRAG separates three independent language roles:
 
-### Input
+```text
+1. Source / Knowledge Language
+2. Query Language
+3. Target Answer Language
+```
 
-MultiLinguaRAG accepts two kinds of input:
-
-1. **Knowledge-base documents** — PDF, DOCX, PPTX, XLSX, Markdown, TXT, HTML, or CSV files in Chinese, Japanese, and/or English.
-2. **User query** — a natural-language question in Chinese, Japanese, or English.
+They do **not** have to match.
 
 Example:
 
 ```text
 Knowledge base:
-- zh_rag.md
-- ja_rag.md
-- en_rag.md
+🇺🇸 English research papers
 
 User query:
-RAG 是什么？
+🇨🇳 中文
+“这些材料对跨文化传播的主要观点是什么？”
+
+Answer language:
+🇯🇵 Japanese
+
+Output:
+🇯🇵 日本語で根拠付きの回答
++ citations back to the original English sources
 ```
 
-### Output
+This is useful in multilingual academic and professional workflows—for example, preparing Japanese teaching materials from English research sources while interacting with the system in Chinese.
+
+## ⌨️ Inputs and outputs
+
+### Inputs
+
+MultiLinguaRAG takes **three inputs**:
+
+1. **Knowledge-base documents** — Chinese, Japanese, English, or mixed-language files.
+2. **User query** — a question in Chinese, Japanese, or English.
+3. **Target answer language** — `Auto`, `Chinese`, `Japanese`, or `English`.
+
+### Outputs
 
 The system returns:
 
-1. **Grounded answer** in the same language as the user's query by default.
-2. **Top-K retrieved evidence chunks** used as context.
-3. **Source metadata** such as file name, page number when available, language, section headings, and similarity score.
-
-Example:
-
-```text
-Answer:
-RAG 会在生成回答之前检索外部知识，并基于检索到的证据生成回答 [S1][S2]。
-
-Sources:
-[S1] ja_rag.md · page n/a · language=ja
-[S2] zh_rag.md · page n/a · language=zh
-```
+1. **Grounded answer in the selected target language**.
+2. **Top-K retrieved evidence chunks**.
+3. **Source citations** with filename, page when available, source language, section headings, and similarity score.
 
 ## 🧠 Core architecture
 
 ```text
-Chinese / Japanese / English documents
-                │
-                ▼
-             Docling
-                │
-                ▼
-          HybridChunker
-                │
-                ▼
-       Qwen3-Embedding-0.6B
-                │
-                ▼
-             Qdrant
-                ▲
-                │
-User query → Qwen3 query embedding
-                │
-                ▼
-          Top-K retrieval
-                │
-                ▼
-       Context + Question
-                │
-                ▼
-               LLM
-                │
-                ▼
-      Answer + source citations
+Multilingual documents
+ZH / JA / EN / mixed
+        │
+        ▼
+     Docling
+        │
+        ▼
+  HybridChunker
+        │
+        ▼
+Qwen3-Embedding
+        │
+        ▼
+      Qdrant
+        ▲
+        │
+User query (ZH / JA / EN)
+        │
+        ▼
+ Query Embedding
+        │
+        ▼
+Cross-lingual Top-K Retrieval
+        │
+        ▼
+ Retrieved Evidence
+        │
+        ├─────────────── Target Answer Language
+        │                  Auto / ZH / JA / EN
+        ▼
+       LLM
+        │
+        ▼
+Grounded Answer + Citations
 ```
 
-## 🔥 Why this project is interesting
+## 🌐 Why this is cross-lingual RAG
 
-The key feature is **cross-lingual retrieval**, not simply storing three languages in one database.
-
-Example:
+The key feature is not simply storing three languages in one database. The retriever can match semantic meaning across languages, while the generation stage can independently control the output language.
 
 ```text
-Knowledge base (Japanese):
-「RAG は外部知識を検索して回答生成に利用する技術です。」
-
-User query (Chinese):
-“RAG 是什么？”
-
-→ multilingual query embedding
-→ retrieves the Japanese chunk
-→ answers in Chinese and cites the Japanese source
+English source
+      ↓
+Chinese query
+      ↓
+Qwen3 multilingual embedding
+      ↓
+Retrieve English evidence
+      ↓
+Target language = Japanese
+      ↓
+Japanese grounded answer
 ```
 
-Qwen3-Embedding supports 100+ languages and is designed for multilingual and cross-lingual retrieval. Its model documentation recommends using a query instruction/prompt for query embeddings; this repository follows that pattern.
+This separates:
+
+- **Cross-lingual retrieval:** query language can differ from document language.
+- **Cross-lingual generation:** answer language can differ from both query and document language.
 
 ## 🧰 Stack
 
 | Layer | Technology |
 |---|---|
-| Document parsing | Docling 2.119.0 |
+| Document parsing | Docling |
 | Chunking | Docling HybridChunker |
 | Embedding | Qwen/Qwen3-Embedding-0.6B |
-| Embedding runtime | sentence-transformers 5.7.0 |
-| Vector database | Qdrant Client 1.19.0 (local persistent mode) |
-| Generation | OpenAI Python 3.0.0 / Responses API |
-| UI | Streamlit 1.61.1 |
+| Embedding runtime | sentence-transformers |
+| Vector database | Qdrant local persistent mode |
+| Generation | OpenAI Responses API |
+| UI | Streamlit |
 | Project management | uv + pyproject.toml |
 
 ## 🚀 Quick start
 
-### 1. Install uv
-
-Follow the official uv installation guide, then from this repository run:
+### 1. Install dependencies
 
 ```bash
 uv sync
 ```
-
-> The first local run of Qwen3-Embedding downloads model weights. That download is not included in this Git repository.
 
 ### 2. Configure environment
 
@@ -149,35 +163,40 @@ uv sync
 cp .env.example .env
 ```
 
-`OPENAI_API_KEY` is optional. Without it, retrieval still works and the UI shows retrieved evidence, but answer generation is disabled.
+`OPENAI_API_KEY` is optional. Without it, retrieval still works and the app displays retrieved evidence, but answer generation is disabled.
 
-### 3. Index the bundled multilingual sample documents
+### 3. Index sample documents
 
 ```bash
 uv run multilinguarag-ingest data/sample --recreate
 ```
 
-### 4. Test cross-lingual retrieval
+### 4. Query with an independent answer language
 
-Chinese query against multilingual documents:
-
-```bash
-uv run multilinguarag-query "多语言 embedding 为什么可以检索日文资料？"
-```
-
-Japanese query:
+English source / multilingual knowledge base, Chinese question, Japanese output:
 
 ```bash
-uv run multilinguarag-query "Top-K を大きくしすぎると何が起こりますか？"
+uv run multilinguarag-query \
+  "这些材料里 RAG 的主要作用是什么？" \
+  --answer-language ja
 ```
 
-### 5. Launch the web app
+Other options:
+
+```text
+--answer-language auto   # same language as the query
+--answer-language zh     # Simplified Chinese
+--answer-language ja     # Japanese
+--answer-language en     # English
+```
+
+### 5. Launch the Streamlit app
 
 ```bash
 uv run streamlit run app.py
 ```
 
-Then upload your own documents from the sidebar and rebuild the index.
+In the sidebar, choose **Answer language** independently from the uploaded document language and the language of the question.
 
 ## 📁 Repository structure
 
@@ -185,12 +204,13 @@ Then upload your own documents from the sidebar and rebuild the index.
 MultiLinguaRAG/
 ├── app.py
 ├── data/
-│   ├── sample/                 # small original demo corpus
-│   └── uploads/                # ignored by Git
+│   ├── sample/
+│   └── uploads/
 ├── scripts/
 │   ├── ingest.py
 │   └── query.py
 ├── src/multilinguarag/
+│   ├── cli.py
 │   ├── config.py
 │   ├── embedder.py
 │   ├── generator.py
@@ -199,59 +219,75 @@ MultiLinguaRAG/
 │   ├── models.py
 │   ├── rag.py
 │   └── vectorstore.py
-├── storage/                    # local Qdrant data, ignored by Git
+├── docs/
+│   ├── index.html
+│   └── demo-preview-v3.svg
 ├── tests/
 ├── INTERVIEW_GUIDE.md
-├── .env.example
 ├── pyproject.toml
 └── LICENSE
 ```
 
 ## 🔍 Important implementation choices
 
-### 🔥 1. Structure-aware chunking
-Fixed character splitting is intentionally not the primary chunker. Docling HybridChunker applies tokenizer-aware refinements on top of hierarchical document structure. The chunker is configured with the **same Hugging Face tokenizer used by the Qwen3 embedding model**.
+### 🔥 1. Source language, query language, and output language are independent
 
-### 🔥 2. Query and document embeddings are not encoded identically
-Qwen3-Embedding documents are encoded normally, while queries use `prompt_name="query"` as recommended by the model card.
+The retriever does not translate every document into the query language first. Qwen3-Embedding maps multilingual semantic content into a shared vector space. The output language is controlled later in the generation prompt.
 
-### 🔥 3. Citation metadata is stored with each vector
-A Qdrant point includes the vector plus payload fields such as source, page, language, headings, and the original chunk text. This preserves the connection from retrieval result back to source evidence.
+### 🔥 2. Retrieval happens before output-language generation
 
-### 🔥 4. V1 is deliberately dense-only
-No BM25, reranker, query rewriting, CRAG, Self-RAG, or agent routing is included in V1. The purpose is to establish a clean baseline that can be evaluated before adding complexity.
+The selected answer language does **not** change which source language must be retrieved. Retrieval is based on semantic relevance; the LLM then expresses the grounded evidence in the requested target language.
+
+### 🔥 3. Citations always point to the original sources
+
+If an English paper is retrieved and the final answer is Japanese, the citation still points to the original English paper and page. The answer language does not rewrite source provenance.
+
+### 🔥 4. V1 stays intentionally simple
+
+No BM25, reranker, query rewriting, agent routing, CRAG, or Self-RAG is included. The goal is to make the core pipeline understandable and testable before adding complexity.
 
 ## 🎯 Interview questions
 
-Before putting this project on a resume, be able to answer:
+Be ready to answer:
 
-1. Why use RAG instead of only prompting an LLM?
-2. How can a Chinese query retrieve a Japanese document?
-3. Why use the embedding model's tokenizer for chunking?
-4. Why use Qdrant instead of a plain list of vectors?
-5. What is cosine similarity?
-6. What is Top-K and what is its precision/recall trade-off?
-7. Why does Qwen3 use a query prompt but not the same prompt for documents?
-8. Why can RAG still hallucinate?
-9. How would you evaluate cross-lingual retrieval?
-10. What would you add after the dense V1 baseline?
+1. What is the difference between source language, query language, and answer language?
+2. How can a Chinese query retrieve an English or Japanese source?
+3. Why not translate every document into the user's language before indexing?
+4. How do you force the answer to be Japanese when the query is Chinese?
+5. Does changing the answer language affect retrieval?
+6. How are citations preserved when the source and answer languages differ?
+7. Why use a multilingual embedding model?
+8. What is Top-K and what are the trade-offs?
+9. How would you evaluate cross-lingual retrieval separately from generation quality?
+10. How would you test English-source → Chinese-query → Japanese-answer workflows?
 
 See **[INTERVIEW_GUIDE.md](INTERVIEW_GUIDE.md)** for answer frameworks.
 
-## 📊 Recommended evaluation before claiming results
+## 📊 Recommended evaluation
 
-Create labeled queries for:
+Evaluate retrieval and generation separately.
 
-- zh query → zh source
-- ja query → ja source
-- en query → en source
-- **zh query → ja source**
-- **ja query → en source**
-- **en query → zh source**
+### Retrieval
 
-Report retrieval metrics such as **Recall@K** and **MRR**. Do not put invented accuracy improvements in the README or resume.
+Create labeled query-source pairs such as:
 
-## 🗺️ V2 ideas (optional)
+- zh query → en source
+- zh query → ja source
+- ja query → en source
+- en query → zh source
+
+Report **Recall@K** and **MRR**.
+
+### Generation
+
+For the same retrieved evidence, test multiple target languages and evaluate:
+
+- groundedness to the retrieved evidence
+- citation correctness
+- semantic consistency across output languages
+- terminology preservation
+
+## 🗺️ Optional future work
 
 Only after V1 is evaluated:
 
@@ -259,15 +295,7 @@ Only after V1 is evaluated:
 - hybrid dense + sparse retrieval
 - metadata filtering
 - parent-child retrieval
-- retrieval evaluation dashboard
-
-## 📚 Primary references
-
-- [Docling documentation](https://docling-project.github.io/docling/)
-- [Docling Hybrid Chunking](https://docling-project.github.io/docling/_generated/examples/hybrid_chunking/)
-- [Qwen3-Embedding-0.6B model card](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B)
-- [Qdrant similarity search](https://qdrant.tech/documentation/search/search/)
-- [OpenAI Python SDK](https://github.com/openai/openai-python)
+- generation consistency evaluation across languages
 
 ## License
 

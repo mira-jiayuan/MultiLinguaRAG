@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640">
+  <rect width="1200" height="640" fill="#f7f8fb"/>
+  <rect x="36" y="34" width="1128" height="572" rx="24" fill="#ffffff" stroke="#e5e7eb"/>
+  <rect x="36" y="34" width="305" height="572" rx="24" fill="#fbfcff"/>
+  <line x1="341" y1="34" x2="341" y2="606" stroke="#e5e7eb"/>
+  <text x="70" y="85" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#14213d">🌏 MultiLinguaRAG</text>
+  <text x="70" y="118" font-family="Arial, sans-serif" font-size="14" fill="#667085">Cross-lingual knowledge workflow</text>
+  <text x="70" y="168" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#98a2b3">KNOWLEDGE BASE</text>
+  <rect x="70" y="184" width="235" height="46" rx="10" fill="#fff" stroke="#e5e7eb"/>
+  <text x="84" y="213" font-family="Arial, sans-serif" font-size="13" fill="#334155">📄 communication_theory.pdf</text>
+  <rect x="264" y="197" width="29" height="19" rx="9" fill="#eef2ff"/><text x="270" y="211" font-family="Arial" font-size="10" font-weight="700" fill="#4338ca">EN</text>
+  <rect x="70" y="240" width="235" height="46" rx="10" fill="#fff" stroke="#e5e7eb"/>
+  <text x="84" y="269" font-family="Arial, sans-serif" font-size="13" fill="#334155">📄 social_media_report.pdf</text>
+  <rect x="264" y="253" width="29" height="19" rx="9" fill="#eef2ff"/><text x="270" y="267" font-family="Arial" font-size="10" font-weight="700" fill="#4338ca">EN</text>
+  <text x="70" y="335" font-family="Arial" font-size="11" font-weight="700" fill="#98a2b3">ANSWER LANGUAGE</text>
+  <rect x="70" y="352" width="235" height="54" rx="11" fill="#fff" stroke="#e5e7eb"/>
+  <text x="84" y="373" font-family="Arial" font-size="11" fill="#667085">Target output</text>
+  <text x="84" y="394" font-family="Arial" font-size="15" font-weight="700" fill="#3730a3">日本語</text>
+  <text x="380" y="84" font-family="Arial" font-size="18" font-weight="700" fill="#14213d">English sources → Chinese query → Japanese answer</text>
+  <rect x="380" y="112" width="160" height="30" rx="15" fill="#fff" stroke="#e5e7eb"/><text x="399" y="132" font-family="Arial" font-size="12" fill="#475569">🇺🇸 English sources</text>
+  <text x="552" y="132" font-family="Arial" font-size="14" fill="#94a3b8">→</text>
+  <rect x="574" y="112" width="150" height="30" rx="15" fill="#fff" stroke="#e5e7eb"/><text x="594" y="132" font-family="Arial" font-size="12" fill="#475569">🇨🇳 Chinese query</text>
+  <text x="735" y="132" font-family="Arial" font-size="14" fill="#94a3b8">→</text>
+  <rect x="758" y="112" width="170" height="30" rx="15" fill="#eef2ff" stroke="#c7d2fe"/><text x="778" y="132" font-family="Arial" font-size="12" font-weight="700" fill="#3730a3">🇯🇵 Japanese answer</text>
+  <rect x="585" y="172" width="530" height="74" rx="15" fill="#111827"/>
+  <text x="610" y="201" font-family="Arial" font-size="14" fill="#fff">这些材料如何解释社交媒体对跨文化传播的影响？</text>
+  <text x="610" y="226" font-family="Arial" font-size="11" fill="#cbd5e1">Detected query language: ZH</text>
+  <rect x="380" y="278" width="690" height="250" rx="16" fill="#f8fafc" stroke="#e5e7eb"/>
+  <text x="405" y="310" font-family="Arial" font-size="15" font-weight="700" fill="#14213d">🇯🇵 Grounded answer</text>
+  <text x="405" y="344" font-family="Arial" font-size="14" fill="#334155">ソーシャルメディアは、異なる文化的背景をもつ人々の接触機会を増やし、</text>
+  <text x="405" y="369" font-family="Arial" font-size="14" fill="#334155">情報共有を加速させる一方で、文脈の欠落による誤解も生みやすいとされています [S1][S2]。</text>
+  <text x="405" y="399" font-family="Arial" font-size="11" fill="#64748b">Output: JA · citations preserved from original EN sources</text>
+  <rect x="405" y="425" width="310" height="74" rx="12" fill="#fff" stroke="#e5e7eb"/>
+  <text x="420" y="448" font-family="Arial" font-size="11" font-weight="700" fill="#14213d">[S1] communication_theory.pdf · p.12 · EN</text>
+  <text x="420" y="470" font-family="Arial" font-size="10.5" fill="#64748b">Social media increases opportunities for intercultural contact...</text>
+  <rect x="730" y="425" width="310" height="74" rx="12" fill="#fff" stroke="#e5e7eb"/>
+  <text x="745" y="448" font-family="Arial" font-size="11" font-weight="700" fill="#14213d">[S2] social_media_report.pdf · p.7 · EN</text>
+  <text x="745" y="470" font-family="Arial" font-size="10.5" fill="#64748b">Cross-cultural misunderstanding can emerge when context is missing...</text>
+  <text x="380" y="571" font-family="Arial" font-size="12" fill="#94a3b8">Source language, query language, and answer language are independently configurable.</text>
+</svg>

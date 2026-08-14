@@ -1,56 +1,66 @@
 # MultiLinguaRAG Interview Guide
 
-Use this file to review the project before an interview. Do not memorize wording mechanically; be able to explain the data flow in your own words.
-
 ## 🔥 Core story in 30 seconds
 
-MultiLinguaRAG is a compact cross-lingual RAG system for Chinese, Japanese, and English documents. Documents are parsed with Docling, structure-aware chunks are produced with HybridChunker, chunks and queries are embedded with Qwen3-Embedding, and Qdrant retrieves the Top-K most similar chunks. The retrieved evidence is passed to an LLM, which is instructed to answer only from the evidence and cite the original sources.
+MultiLinguaRAG is a cross-lingual RAG system in which the **knowledge-source language, query language, and answer language are independent**. Documents are parsed with Docling, chunked with HybridChunker, embedded with Qwen3-Embedding, and indexed in Qdrant. At query time, the system retrieves the most semantically relevant evidence across Chinese, Japanese, and English. The user can then choose a target output language—for example, English source documents, a Chinese question, and a Japanese grounded answer with citations back to the original English sources.
 
-## 🎯 Technical questions you should be ready for
+## 🎯 Technical questions
 
-### 1. What is the difference between RAG and directly asking an LLM?
-RAG adds an external retrieval step. The model receives task-relevant evidence at inference time, so the answer can use private or updated knowledge that is not guaranteed to exist in model parameters.
+### 1. What is the main design idea of this project?
+The project decouples three language roles: source language, query language, and answer language. Retrieval finds semantically relevant evidence regardless of language, while generation separately controls the final response language.
 
-### 2. Why use a multilingual embedding model?
-A multilingual embedding model can map semantically similar Chinese, Japanese, and English text into a shared vector space. That enables cross-lingual retrieval, such as a Chinese query retrieving a Japanese source.
+### 2. How can a Chinese query retrieve an English or Japanese document?
+Qwen3-Embedding maps semantically related multilingual text into a shared vector space. The Chinese query vector can therefore be close to an English or Japanese document vector when they express the same meaning.
 
-### 3. Why does this project use the Qwen3 query prompt only for queries?
-Qwen3-Embedding is instruction-aware. Its model documentation recommends query-side prompting while documents are encoded normally. This helps align a search query with candidate documents.
+### 3. Why not translate all documents into Chinese or Japanese before indexing?
+Pre-translating the entire corpus increases preprocessing cost, creates translated duplicates, and may introduce translation errors before retrieval. A multilingual embedding model allows retrieval from the original sources while preserving provenance.
 
-### 4. Why use Docling HybridChunker instead of fixed 500-character splitting?
-HybridChunker first respects document structure and then applies tokenizer-aware refinement. The goal is to preserve meaningful sections while keeping each chunk within the embedding model's token budget.
+### 4. How can a Chinese query produce a Japanese answer?
+Retrieval and generation are separate stages. The Chinese query is used to retrieve evidence first. The generation prompt then explicitly instructs the LLM to express the grounded answer in Japanese.
 
-### 5. Why should the chunker use the embedding model's tokenizer?
-The embedding model consumes tokens, not characters. Using the same tokenizer makes the chunk-size constraint correspond to the model's actual input representation rather than an approximate character count.
+### 5. Does selecting Japanese output change the retrieval results?
+Not in V1. Retrieval is driven by the query embedding and semantic similarity. The target answer language is applied after retrieval, during generation. This clean separation makes the pipeline easier to reason about and evaluate.
 
-### 6. What is stored in Qdrant?
-Each point stores a dense vector plus payload metadata: original chunk text, source filename, page number when available, language label, and section headings.
+### 6. How do citations work when the output language differs from the source language?
+Each retrieved Qdrant point retains original metadata such as source filename, page number, language, and section. The generated answer cites [S1], [S2], etc., which map back to the original source evidence—not to a translated copy.
 
-### 7. Why cosine similarity?
-The project normalizes Qwen3 embeddings and uses cosine similarity to rank vectors by semantic direction. It is a common dense retrieval metric and is supported directly by Qdrant.
+### 7. Why is this useful in a real workflow?
+One example is multilingual teaching assistance: source materials may be English research papers, the user may formulate questions more efficiently in Chinese, while the final teaching notes or explanations need to be delivered in Japanese.
 
-### 8. What does Top-K mean? What happens if K is too small or too large?
-Top-K is the number of retrieved chunks. Too small can reduce recall and miss evidence; too large can inject irrelevant context, increase token cost, and make generation less focused.
+### 8. What is the difference between cross-lingual retrieval and multilingual generation?
+Cross-lingual retrieval means the query and retrieved document can be in different languages. Multilingual generation means the output can be produced in a selected target language. MultiLinguaRAG supports both.
 
-### 9. Does RAG eliminate hallucination?
-No. RAG can reduce unsupported answers, but failure can still happen if parsing, chunking, retrieval, or generation is wrong. Grounding instructions and citations make errors easier to inspect but do not guarantee factuality.
+### 9. Why use Docling HybridChunker instead of fixed-length character splitting?
+HybridChunker respects document structure and applies tokenizer-aware refinement, helping preserve meaningful sections while keeping chunks within the embedding model's input budget.
 
-### 10. What is the most important multilingual experiment for this project?
-Cross-lingual retrieval: test zh→ja, ja→en, and en→zh query-document pairs, and report whether the correct source appears in Recall@K.
+### 10. Why should chunking use the embedding model's tokenizer?
+The embedding model consumes tokens, not characters. Using the same tokenizer makes chunk-size constraints correspond to the model's real input representation.
 
-### 11. Why is there no reranker / BM25 / agent in V1?
-V1 intentionally isolates the core RAG pipeline. A simple dense baseline is easier to debug and evaluate. Advanced retrieval should be added only after the baseline is measured.
+### 11. What is stored in Qdrant?
+Each point stores a dense vector plus payload metadata including the original chunk text, source filename, page number when available, source language, and section headings.
 
-### 12. How would you improve this project next?
-Add a multilingual evaluation set first, then compare dense-only retrieval with hybrid retrieval and reranking. Other extensions include metadata filtering and parent-child retrieval.
+### 12. What is Top-K?
+Top-K is the number of retrieved chunks. A K that is too small can miss evidence; a K that is too large can introduce noise, increase context cost, and reduce generation focus.
+
+### 13. Does RAG eliminate hallucination?
+No. RAG can reduce unsupported answers, but parsing, chunking, retrieval, or generation can still fail. Citations and visible retrieved evidence make those failures easier to inspect.
+
+### 14. How would you evaluate the project?
+Separate retrieval evaluation from generation evaluation. For retrieval, use labeled cross-lingual query-source pairs and report Recall@K and MRR. For generation, evaluate groundedness, citation correctness, terminology preservation, and semantic consistency across target languages.
+
+### 15. Why does V1 not include BM25, reranking, or agents?
+V1 intentionally isolates the core Indexing → Retrieval → Generation pipeline. A simple dense baseline is easier to debug, evaluate, and explain before adding more advanced retrieval components.
 
 ## 💼 HR / non-technical questions
 
 ### “What did you build?”
-I built a multilingual document QA system that lets users ask questions in Chinese, Japanese, or English and retrieve evidence across languages before generating a cited answer.
+I built a multilingual knowledge assistant that can use source documents in one language, accept a question in another language, and generate a grounded answer in a third language while preserving citations to the original evidence.
 
-### “What was the hardest part?”
-A strong answer should mention one concrete engineering trade-off you actually tested after running the project—for example chunk size, model download/memory, cross-lingual retrieval quality, or citation metadata preservation.
+### “What problem does it solve?”
+It reduces friction in multilingual knowledge work. For example, a user can read and index English academic sources, ask questions in Chinese, and directly obtain Japanese material for teaching or communication without manually translating the whole corpus first.
+
+### “What is the most distinctive feature?”
+The source language, query language, and answer language are independently configurable rather than being forced to match.
 
 ### “How do you know it works?”
-Do not answer “the demo looks good.” Explain that you would build a labeled multilingual retrieval set and measure Recall@K / MRR, then separately evaluate answer groundedness and citation correctness.
+I would evaluate cross-lingual retrieval with labeled query-source pairs using Recall@K/MRR, then evaluate generated answers separately for groundedness, citation correctness, and cross-language semantic consistency.

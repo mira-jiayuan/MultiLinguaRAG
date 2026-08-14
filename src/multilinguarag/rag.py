@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .config import Settings, settings
 from .embedder import Qwen3Embedder
-from .generator import OpenAIGenerator
+from .generator import OpenAIGenerator, generation_disabled_message
 from .ingestion import DocumentIngestor
 from .models import RetrievedChunk
 from .vectorstore import QdrantStore
@@ -30,15 +30,20 @@ class MultiLinguaRAG:
         query_vector = self.embedder.embed_query(question)
         return self.store.search(query_vector, k or self.cfg.top_k)
 
-    def answer(self, question: str, k: int | None = None) -> tuple[str, list[RetrievedChunk]]:
+    def answer(
+        self,
+        question: str,
+        k: int | None = None,
+        answer_language: str | None = "auto",
+    ) -> tuple[str, list[RetrievedChunk]]:
         chunks = self.retrieve(question, k=k)
         if not chunks:
             return "No relevant context was retrieved.", []
         if not self.cfg.openai_api_key:
-            return (
-                "Generation is disabled because OPENAI_API_KEY is not configured. "
-                "The retrieved evidence is shown below.",
-                chunks,
-            )
-        answer = OpenAIGenerator(self.cfg).generate(question, chunks)
+            return generation_disabled_message(answer_language), chunks
+        answer = OpenAIGenerator(self.cfg).generate(
+            question,
+            chunks,
+            answer_language=answer_language,
+        )
         return answer, chunks
